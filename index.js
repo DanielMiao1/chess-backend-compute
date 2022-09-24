@@ -1,11 +1,18 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const crypto = require("crypto");
-var engine = require("./stockfish.js/load_engine")(__dirname + "/node_modules/stockfish/src/stockfish.js")
+const load_engine = require("./stockfish.js/load_engine");
+const https = require("https");
+const http = require("http");
 
-engine.send("uci\n", function(data) {
-  console.log(data);
-});
+const server_url = "validation.multiplayer-chess.gq";
+// const server_url = "localhost";
+
+const server_port = "443";
+// const server_port = "34874";
+
+const method = https;
+// const method = http;
 
 const app = express();
 
@@ -25,7 +32,6 @@ app.post("/auth", function(request, response) {
   if (!request.headers["-x-uuid"]) {
     response.status(400);
     response.end();
-    console.log("hi");
     return;
   };
   let data = crypto.randomInt(1000000) * parseInt(process.env.SECRET2);
@@ -40,7 +46,7 @@ app.post("/result", function(request, response) {
     response.status(400);
     response.end();
     return;
-  } else if (parseInt(request.body) == NaN || !request.headers["-x-fen"]) {
+  } else if (!request.headers["-x-fen"] || !request.headers["-x-board-id"] || parseInt(request.body) == NaN) {
     delete authorization_requests[request.headers["-x-uuid"]];
     response.status(400);
     response.end();
@@ -50,11 +56,33 @@ app.post("/result", function(request, response) {
     response.end();
     return;
   };
+
+  delete authorization_requests[request.headers["-x-uuid"]];
+
   response.send("authorized");
   response.end();
-});
 
-app.post("/analyse", function(request, response) {
-  console.log(request.body)
-  response.send("a");
+  var engine = load_engine(__dirname + "/node_modules/stockfish/src/stockfish.js")
+
+  // TODO: enable NNUE
+
+  engine.send("uci");
+  engine.send("ucinewgame");
+  engine.send(`position fen ${request.headers["-x-fen"]}`);
+  engine.send("go movetime 4000", function(data) {
+    const request_ = method.request({
+      method: "POST",
+      hostname: server_url,
+      port: server_port,
+      path: "/result",
+      headers: {"Content-Type": "text/plain", "-x-board-id": parseInt(request.headers["-x-board-id"]) * parseInt(process.env.SECRET3) - parseInt(process.env.SECRET2) + parseInt(process.env.SECRET3)}
+    });
+    
+    request_.on("error", error => {
+      console.error(error);
+    });
+    
+    request_.write(data.split(" ")[1]);
+    request_.end();
+  });
 });
