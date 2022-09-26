@@ -1,5 +1,5 @@
 # Chess Backend (Compute)
-This is the other backend https://multiplayerchess.gq/, responsible for computational tasks, including chess position analysis and evaluation.
+This is the other backend of https://multiplayerchess.gq/, responsible for computational tasks, including chess position analysis and evaluation.
 
 This source code is licenced under the GNU General Public License Version 3.0, the full license text can be viewed in the LICENSE file.
 
