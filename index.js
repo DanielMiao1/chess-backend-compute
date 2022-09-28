@@ -2,9 +2,8 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const crypto = require("crypto");
 const load_engine = require("./stockfish.js/load_engine");
-// const https = require("https");
+const https = require("https");
 const http = require("http");
-// const dse = require("dse-driver");
 
 const server_url = "validation.multiplayerchess.gq";
 // const server_url = "localhost";
@@ -16,33 +15,6 @@ const server_port = "443";
 const method = http;
 
 const app = express();
-
-// async function queryDB(query, callback) {
-//   await (async function() { //what
-//     const client = new dse.Client({
-//       protocolOptions: {
-//         maxVersion: 4
-//       },
-//       cloud: {
-//         secureConnectBundle: __dirname.split("/").slice(0, -1).join("/") + "/secure-connect-chess.zip",
-//       },
-//       credentials: {
-//         username: process.env.DB_ID,
-//         password: process.env.DB_SECRET,
-//       },
-//     });
-
-//     await client.connect();
-//     const result = await client.execute(query);
-//     callback(result)
-  
-//     await client.shutdown();
-//   })();
-// };
-
-// queryDB("SELECT * FROM chess.dev1", function(r) {
-//   console.log(r);
-// });
 
 var authorization_requests = {};
 
